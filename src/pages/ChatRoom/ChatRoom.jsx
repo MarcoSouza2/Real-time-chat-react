@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Navigate, useLocation, useNavigate } from "react-router-dom"
+import { API_BASE_URL, resolveHttpUrl, resolveWsUrl } from "../../lib/connection"
 import "./style.css"
-
-const API_BASE_URL = "http://192.168.100.23:3333"
 
 function buildInitials(name) {
   const cleaned = (name ?? "").trim()
@@ -11,20 +10,14 @@ function buildInitials(name) {
   return parts.map((part) => part[0]?.toUpperCase()).join("")
 }
 
-function normalizeAvatarUrl(url) {
-  if (!url) return null
-  if (url.startsWith("http://") || url.startsWith("https://")) return url
-  return `${API_BASE_URL}${url}`
-}
-
 export default function ChatRoom() {
   const navigate = useNavigate()
   const { state } = useLocation()
 
   const name = state?.name ?? ""
   const roomId = state?.roomId ?? ""
-  const wsUrl = state?.wsUrl
-  const userAvatarUrl = normalizeAvatarUrl(state?.userAvatarUrl)
+  const wsUrl = resolveWsUrl(state?.wsUrl)
+  const userAvatarUrl = resolveHttpUrl(state?.userAvatarUrl)
 
   const [text, setText] = useState("")
   const [messages, setMessages] = useState([])
@@ -83,7 +76,7 @@ export default function ChatRoom() {
           id: msg.id,
           author: msg.userName ?? msg.user?.name ?? "Usuario",
           content: msg.content,
-          avatarUrl: normalizeAvatarUrl(msg.userAvatarUrl ?? msg.user?.avatarUrl),
+          avatarUrl: resolveHttpUrl(msg.userAvatarUrl ?? msg.user?.avatarUrl),
         }))
 
         setMessages(formatted)
@@ -104,7 +97,7 @@ export default function ChatRoom() {
         setParticipants(list.map((participant) => ({
           id: participant.id,
           name: participant.name,
-          avatarUrl: normalizeAvatarUrl(participant.avatarUrl),
+          avatarUrl: resolveHttpUrl(participant.avatarUrl),
         })))
       } catch (err) {
         console.error("Erro ao carregar participantes:", err)
@@ -139,7 +132,7 @@ export default function ChatRoom() {
                 setParticipants(list.map((participant) => ({
                   id: participant.id,
                   name: participant.name,
-                  avatarUrl: normalizeAvatarUrl(participant.avatarUrl),
+                  avatarUrl: resolveHttpUrl(participant.avatarUrl),
                 })))
                 break
               }
@@ -155,7 +148,7 @@ export default function ChatRoom() {
                     {
                       id: participant.id,
                       name: participant.name,
-                      avatarUrl: normalizeAvatarUrl(participant.avatarUrl),
+                      avatarUrl: resolveHttpUrl(participant.avatarUrl),
                     },
                   ]
                 })
@@ -187,7 +180,7 @@ export default function ChatRoom() {
                       id: msg.id ?? crypto.randomUUID(),
                       author,
                       content,
-                      avatarUrl: normalizeAvatarUrl(msg.userAvatarUrl ?? msg.user?.avatarUrl),
+                      avatarUrl: resolveHttpUrl(msg.userAvatarUrl ?? msg.user?.avatarUrl),
                     },
                   ]
                 })

@@ -1,16 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { API_BASE_URL, resolveHttpUrl } from "../../lib/connection"
 import "./style.css"
-
-const API_BASE_URL = "http://192.168.100.23:3333"
-
-function resolveAvatarUrl(relativeUrl) {
-  if (!relativeUrl) return null
-  if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
-    return relativeUrl
-  }
-  return `${API_BASE_URL}${relativeUrl}`
-}
 
 export default function JoinRoom() {
 
@@ -47,7 +38,7 @@ export default function JoinRoom() {
         }
 
         const uploadData = await uploadResponse.json()
-        avatarUrl = resolveAvatarUrl(uploadData?.avatarUrl ?? null)
+        avatarUrl = resolveHttpUrl(uploadData?.avatarUrl ?? null)
       }
 
       // 2) Criar sessão (POST /sessions)
@@ -74,7 +65,7 @@ export default function JoinRoom() {
         name: session?.user?.name ?? name,
         roomId: session?.roomId ?? roomId,
         userId: session?.userId,
-        userAvatarUrl: resolveAvatarUrl(session?.user?.avatarUrl ?? avatarUrl),
+        userAvatarUrl: resolveHttpUrl(session?.user?.avatarUrl ?? avatarUrl),
         wsUrl: session?.wsUrl,
       }
 
